@@ -63,7 +63,7 @@ func main() {
 	if terminal.IsTerminal(int(os.Stdin.Fd())) {
 		utils.PrintRemaining(remaining)
 	} else {
-
+		//FIXME:  when both STDIN and args are being used, there program won't exit without a <cr>
 		fmt.Println("not a tty")
 		//read from STDIN (presumably a pipe)
 		utils.PrintRemaining(utils.ReadFromSTDIN())

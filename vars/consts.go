@@ -5,7 +5,7 @@ const (
 	MiB         = 1048576.0
 	GiB         = 1073742000.0
 	TiB         = 1099512000000.0
-	ProgVer     = "rgb 0.01"
+	ProgVer     = "rgb 0.03"
 	AuthAddy    = "<git.lamashtu@gmail.com>"
 	LicenseText = "The MIT License (MIT)\nCopyright (c) 2013-2018 David Ryack\n\nPermission is hereby granted, free of " +
 		"charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\")," +

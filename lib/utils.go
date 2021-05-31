@@ -13,7 +13,7 @@ func ProcessArgs(tib, gib, mib, kib, enum bool, prec int) *getoptions.GetOpt {
 	Opt := getoptions.New()
 	Opt.Bool("help", false, Opt.Alias("h", "?"))
 	Opt.Bool("license", false)
-	Opt.Bool("version", false, Opt.Alias("v"))
+	Opt.Bool("version", false, Opt.Alias("V"))
 	Opt.BoolVar(&tib, "tib", false, Opt.Alias("t"), Opt.Description("display in TiB"))
 	Opt.BoolVar(&gib, "gib", true, Opt.Alias("g"), Opt.Description("display in GiB"))
 	Opt.BoolVar(&mib, "mib", false, Opt.Alias("m"), Opt.Description("display in MiB"))

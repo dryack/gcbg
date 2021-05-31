@@ -1,7 +1,7 @@
 package vars
 
 const (
-	Kib         = 1024.0
+	KiB         = 1024.0
 	MiB         = 1048576.0
 	GiB         = 1073742000.0
 	TiB         = 1099512000000.0

@@ -6,6 +6,7 @@ import (
 	"github.com/DavidGamba/go-getoptions"
 	"io"
 	"os"
+	v "rcgb/vars"
 	"strings"
 )
 
@@ -22,6 +23,25 @@ func ProcessArgs(tib, gib, mib, kib, enum bool, prec int) *getoptions.GetOpt {
 	Opt.IntVar(&prec, "precision", 2, Opt.Alias("p"), Opt.Description("show results with a precision on N decimal places"))
 
 	return Opt
+}
+
+func DisplayHelp(opt *getoptions.GetOpt) {
+	fmt.Fprintf(os.Stderr, opt.Help())
+}
+
+func CheckImmediateExitOpts(opt *getoptions.GetOpt) {
+	if opt.Called("help") {
+		DisplayHelp(opt)
+		os.Exit(0)
+	}
+	if opt.Called("license") {
+		fmt.Fprintf(os.Stderr, v.LicenseText)
+		os.Exit(0)
+	}
+	if opt.Called("version") {
+		fmt.Fprintf(os.Stderr, v.ProgVer)
+		os.Exit(0)
+	}
 }
 
 func PrintRemaining(remaining []string) {

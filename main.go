@@ -28,42 +28,33 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	utils "rcgb/lib"
-	v "rcgb/vars"
 )
 
 func main() {
-	var tib bool
-	var gib bool
-	var mib bool
-	var kib bool
-	var enum bool
-	var prec int
+	var (
+		tib  bool
+		gib  bool
+		mib  bool
+		kib  bool
+		enum bool
+		prec int
+	)
 
 	opt := utils.ProcessArgs(tib, gib, mib, kib, enum, prec)
-
 	remaining, err := opt.Parse(os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
+		utils.DisplayHelp(opt)
 		os.Exit(1)
 	}
 
-	if opt.Called("help") {
-		fmt.Fprintf(os.Stderr, opt.Help())
-		os.Exit(0)
-	}
-	if opt.Called("license") {
-		fmt.Fprintf(os.Stderr, v.LicenseText)
-		os.Exit(0)
-	}
-	if opt.Called("version") {
-		fmt.Fprintf(os.Stderr, v.ProgVer)
-		os.Exit(0)
-	}
+	// options that result in immediate exit, such as --version or --help
+	utils.CheckImmediateExitOpts(opt)
 
 	if terminal.IsTerminal(int(os.Stdin.Fd())) {
 		utils.PrintRemaining(remaining)
 	} else {
-		//FIXME:  when both STDIN and args are being used, there program won't exit without a <cr>
+		// FIXME: when both STDIN and args are being used, there program won't exit without a <cr>
 		fmt.Println("not a tty")
 		//read from STDIN (presumably a pipe)
 		utils.PrintRemaining(utils.ReadFromSTDIN())

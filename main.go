@@ -24,7 +24,6 @@ package main
 
 import (
 	"fmt"
-	//"github.com/DavidGamba/go-getoptions"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	utils "rcgb/lib"

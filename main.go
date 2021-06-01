@@ -47,10 +47,11 @@ func main() {
 	// options that result in immediate exit, such as --version or --help
 	utils.CheckImmediateExitOpts(opt)
 	prec := utils.Prec
+	suppress := utils.Suppress
 
 	if terminal.IsTerminal(int(os.Stdin.Fd())) {
 		//utils.PrintRemaining(remaining)
-		err := utils.DisplayResults(remaining, prec)
+		err := utils.DisplayResults(remaining, prec, suppress)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
 			utils.DisplayHelp(opt)

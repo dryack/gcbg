@@ -14,12 +14,13 @@ import (
 )
 
 var (
-	tib  bool
-	gib  bool
-	mib  bool
-	kib  bool
-	enum bool
-	Prec int
+	tib      bool
+	gib      bool
+	mib      bool
+	kib      bool
+	enum     bool
+	Suppress bool
+	Prec     int
 )
 
 func ProcessArgs() *getoptions.GetOpt {
@@ -33,6 +34,7 @@ func ProcessArgs() *getoptions.GetOpt {
 	Opt.BoolVar(&mib, "mib", false, Opt.Alias("m"), Opt.Description("display in MiB"))
 	Opt.BoolVar(&kib, "kib", false, Opt.Alias("k"), Opt.Description("display in KiB"))
 	Opt.BoolVar(&enum, "enum", false, Opt.Alias("e"), Opt.Description("enumerate results"))
+	Opt.BoolVar(&Suppress, "suppress", false, Opt.Alias("s"), Opt.Description("suppress SI postfix"))
 	Opt.IntVar(&Prec, "precision", 2, Opt.Alias("p"), Opt.Description("show results with a precision on N decimal places"))
 
 	return Opt
@@ -203,7 +205,7 @@ func getPostFix(index int) (string, error) {
 	return "n/a", errors.New("unknown postfix in getPostFix()")
 }
 
-func DisplayResults(remaining []string, precision int) error {
+func DisplayResults(remaining []string, precision int, suppress bool) error {
 	si, err := GetSIOption()
 	if err != nil {
 		return err
@@ -221,7 +223,10 @@ func DisplayResults(remaining []string, precision int) error {
 			}
 			// format each result with the appropriate precision
 			formatted := strconv.FormatFloat(res[j], 'f', precision, 64)
-			postfix, _ := getPostFix(j)
+			postfix := ""
+			if !suppress {
+				postfix, _ = getPostFix(j)
+			}
 			fmt.Fprintf(os.Stdout, "%s %s\n", formatted, postfix)
 		}
 	}

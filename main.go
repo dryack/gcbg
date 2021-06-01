@@ -24,23 +24,19 @@ package main
 
 import (
 	"fmt"
-	//"github.com/DavidGamba/go-getoptions"
+	utils "gcgb/lib"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
-	utils "rcgb/lib"
 )
 
 func main() {
-	var (
-		tib  bool
-		gib  bool
-		mib  bool
-		kib  bool
-		enum bool
-		prec int
-	)
-
-	opt := utils.ProcessArgs(tib, gib, mib, kib, enum, prec)
+	opt := utils.ProcessArgs()
+	// early bail if there are no args
+	if len(os.Args) < 2 {
+		fmt.Println("ERROR: no arguments provided\n")
+		utils.DisplayHelp(opt)
+		os.Exit(1)
+	}
 	remaining, err := opt.Parse(os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
@@ -50,9 +46,16 @@ func main() {
 
 	// options that result in immediate exit, such as --version or --help
 	utils.CheckImmediateExitOpts(opt)
+	prec := utils.Prec
 
 	if terminal.IsTerminal(int(os.Stdin.Fd())) {
-		utils.PrintRemaining(remaining)
+		//utils.PrintRemaining(remaining)
+		err := utils.DisplayResults(remaining, prec)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
+			utils.DisplayHelp(opt)
+			os.Exit(1)
+		}
 	} else {
 		// FIXME: when both STDIN and args are being used, there program won't exit without a <cr>
 		fmt.Println("not a tty")

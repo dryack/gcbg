@@ -7,7 +7,7 @@ const (
 	TiB         = 1099512000000.0
 	ProgVer     = "rgb 0.03"
 	AuthAddy    = "<git.lamashtu@gmail.com>"
-	LicenseText = "The MIT License (MIT)\nCopyright (c) 2013-2018 David Ryack\n\nPermission is hereby granted, free of " +
+	LicenseText = "The MIT License (MIT)\nCopyright (c) 2021 David Ryack\n\nPermission is hereby granted, free of " +
 		"charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\")," +
 		" to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, " +
 		"modify, merge, publish, distribute, sublicense, and/or sell copies of\nthe Software, and to permit persons " +
@@ -20,22 +20,22 @@ const (
 		"SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\""
 )
 
-var precision uint8 = 2
-
 type SIMode int8
 
 const (
-	TGMK SIMode = iota
-	TMK
-	TGK
+	T SIMode = iota
+	G
+	M
+	K
 	TG
 	TM
 	TK
-	T
-	GMK
+	GM
 	GK
-	G
 	MK
-	M
-	K
+	TGM
+	TMK
+	TGK
+	GMK
+	TGMK
 )

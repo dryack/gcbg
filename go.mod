@@ -1,4 +1,4 @@
-module rcgb
+module gcgb
 
 go 1.16
 

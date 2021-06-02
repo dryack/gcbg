@@ -58,7 +58,6 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		// FIXME: when both STDIN and args are being used, there program won't exit without a <cr>
 		//read from STDIN (presumably a pipe)
 		fromStdin := utils.ReadFromSTDIN()
 		// positional arguments if any

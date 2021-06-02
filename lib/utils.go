@@ -42,6 +42,7 @@ var (
 	kib      bool
 	enum     bool
 	Suppress bool
+	NoWarn   bool
 	Prec     int
 )
 
@@ -57,6 +58,7 @@ func ProcessArgs() *getoptions.GetOpt {
 	Opt.BoolVar(&kib, "kib", false, Opt.Alias("k"), Opt.Description("display in KiB"))
 	Opt.BoolVar(&enum, "enum", false, Opt.Alias("e"), Opt.Description("enumerate results"))
 	Opt.BoolVar(&Suppress, "suppress", false, Opt.Alias("s"), Opt.Description("suppress SI postfix"))
+	Opt.BoolVar(&NoWarn, "no-warnings", false, Opt.Alias("W"), Opt.Description("suppress warnings when invalid numbers are submitted; the processing will continue"))
 	Opt.IntVar(&Prec, "precision", 2, Opt.Alias("p"), Opt.Description("show results with a precision on N decimal places"))
 
 	return Opt
@@ -233,8 +235,20 @@ func DisplayResults(remaining []string, precision int, suppress bool) error {
 		return err
 	}
 	for i := range remaining {
-		num, err := strconv.ParseFloat(remaining[i], len(remaining[i]))
+		num, err := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSuffix(remaining[i], "\n"), "\r"), len(remaining[i]))
 		if err != nil {
+			// handle invalid numbers
+			if errors.Is(err, strconv.ErrSyntax) {
+				// no error, no message - just keep processing
+				if NoWarn {
+					continue
+					// warn user of bad incoming data
+				} else {
+					msg := strings.Split(err.Error(), " ")[2]
+					fmt.Fprintf(os.Stderr, "Warning: %s is not a number\n", msg)
+					continue
+				}
+			}
 			return err
 		}
 

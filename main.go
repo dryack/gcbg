@@ -59,11 +59,16 @@ func main() {
 		}
 	} else {
 		// FIXME: when both STDIN and args are being used, there program won't exit without a <cr>
-		fmt.Println("not a tty")
 		//read from STDIN (presumably a pipe)
-		utils.PrintRemaining(utils.ReadFromSTDIN())
+		fromStdin := utils.ReadFromSTDIN()
 		// positional arguments if any
-		utils.PrintRemaining(remaining)
+		remaining = append(fromStdin, remaining...)
+		err := utils.DisplayResults(remaining, prec, suppress)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
+			utils.DisplayHelp(opt)
+			os.Exit(1)
+		}
 	}
 
 }

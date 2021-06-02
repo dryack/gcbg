@@ -59,7 +59,7 @@ func ProcessArgs() *getoptions.GetOpt {
 	Opt.BoolVar(&enum, "enum", false, Opt.Alias("e"), Opt.Description("enumerate results"))
 	Opt.BoolVar(&Suppress, "suppress", false, Opt.Alias("s"), Opt.Description("suppress SI postfix"))
 	Opt.BoolVar(&NoWarn, "no-warnings", false, Opt.Alias("W"), Opt.Description("suppress warnings when invalid numbers are submitted; the processing will continue"))
-	Opt.IntVar(&Prec, "precision", 2, Opt.Alias("p"), Opt.Description("show results with a precision on N decimal places"))
+	Opt.IntVar(&Prec, "precision", 2, Opt.Alias("p"), Opt.Description("show results with a precision on N decimal places (max: "+strconv.Itoa(v.MaxPrecision)+")"))
 
 	return Opt
 }
@@ -81,6 +81,18 @@ func CheckImmediateExitOpts(opt *getoptions.GetOpt) {
 		fmt.Fprintf(os.Stderr, v.ProgVer)
 		os.Exit(0)
 	}
+}
+
+func CheckPrecision() (int, error) {
+	hold := Prec
+	Prec = v.MaxPrecision
+	if hold > v.MaxPrecision+91 {
+		return Prec, errors.New("exceptionally high precision defined at commandline: `" + strconv.Itoa(hold) + "': check -p argument, the maximum allowed is " + strconv.Itoa(v.MaxPrecision))
+	}
+	if hold > v.MaxPrecision {
+		return Prec, errors.New("precision set to " + strconv.Itoa(v.MaxPrecision) + ", `" + strconv.Itoa(hold) + "' is higher than the maximum")
+	}
+	return Prec, nil
 }
 
 func ReadFromSTDIN() []string {

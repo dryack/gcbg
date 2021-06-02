@@ -46,7 +46,13 @@ func main() {
 
 	// options that result in immediate exit, such as --version or --help
 	utils.CheckImmediateExitOpts(opt)
-	prec := utils.Prec
+
+	// large precisions are both useless, and do obnoxious things to the terminal
+	prec, err := utils.CheckPrecision()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
+	}
+
 	suppress := utils.Suppress
 
 	if terminal.IsTerminal(int(os.Stdin.Fd())) {

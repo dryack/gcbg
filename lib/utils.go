@@ -1,3 +1,25 @@
+/*The MIT License (MIT)
+
+Copyright (c) 2021 David Ryack
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 package lib
 
 import (
@@ -14,12 +36,14 @@ import (
 )
 
 var (
-	tib  bool
-	gib  bool
-	mib  bool
-	kib  bool
-	enum bool
-	Prec int
+	tib      bool
+	gib      bool
+	mib      bool
+	kib      bool
+	enum     bool
+	Suppress bool
+	NoWarn   bool
+	Prec     int
 )
 
 func ProcessArgs() *getoptions.GetOpt {
@@ -33,7 +57,9 @@ func ProcessArgs() *getoptions.GetOpt {
 	Opt.BoolVar(&mib, "mib", false, Opt.Alias("m"), Opt.Description("display in MiB"))
 	Opt.BoolVar(&kib, "kib", false, Opt.Alias("k"), Opt.Description("display in KiB"))
 	Opt.BoolVar(&enum, "enum", false, Opt.Alias("e"), Opt.Description("enumerate results"))
-	Opt.IntVar(&Prec, "precision", 2, Opt.Alias("p"), Opt.Description("show results with a precision on N decimal places"))
+	Opt.BoolVar(&Suppress, "suppress", false, Opt.Alias("s"), Opt.Description("suppress SI postfix"))
+	Opt.BoolVar(&NoWarn, "no-warnings", false, Opt.Alias("W"), Opt.Description("suppress warnings when invalid numbers are submitted; the processing will continue"))
+	Opt.IntVar(&Prec, "precision", 2, Opt.Alias("p"), Opt.Description("show results with a precision on N decimal places (max: "+strconv.Itoa(v.MaxPrecision)+")"))
 
 	return Opt
 }
@@ -55,6 +81,18 @@ func CheckImmediateExitOpts(opt *getoptions.GetOpt) {
 		fmt.Fprintf(os.Stderr, v.ProgVer)
 		os.Exit(0)
 	}
+}
+
+func CheckPrecision() (int, error) {
+	hold := Prec
+	Prec = v.MaxPrecision
+	if hold > v.MaxPrecision+91 {
+		return Prec, errors.New("exceptionally high precision defined at commandline: `" + strconv.Itoa(hold) + "': check -p argument, the maximum allowed is " + strconv.Itoa(v.MaxPrecision))
+	}
+	if hold > v.MaxPrecision {
+		return Prec, errors.New("precision set to " + strconv.Itoa(v.MaxPrecision) + ", `" + strconv.Itoa(hold) + "' is higher than the maximum")
+	}
+	return Prec, nil
 }
 
 func ReadFromSTDIN() []string {
@@ -203,14 +241,26 @@ func getPostFix(index int) (string, error) {
 	return "n/a", errors.New("unknown postfix in getPostFix()")
 }
 
-func DisplayResults(remaining []string, precision int) error {
+func DisplayResults(remaining []string, precision int, suppress bool) error {
 	si, err := GetSIOption()
 	if err != nil {
 		return err
 	}
 	for i := range remaining {
-		num, err := strconv.ParseFloat(remaining[i], len(remaining[i]))
+		num, err := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSuffix(remaining[i], "\n"), "\r"), len(remaining[i]))
 		if err != nil {
+			// handle invalid numbers
+			if errors.Is(err, strconv.ErrSyntax) {
+				// no error, no message - just keep processing
+				if NoWarn {
+					continue
+					// warn user of bad incoming data
+				} else {
+					msg := strings.Split(err.Error(), " ")[2]
+					fmt.Fprintf(os.Stderr, "Warning: %s is not a number\n", msg)
+					continue
+				}
+			}
 			return err
 		}
 
@@ -221,7 +271,10 @@ func DisplayResults(remaining []string, precision int) error {
 			}
 			// format each result with the appropriate precision
 			formatted := strconv.FormatFloat(res[j], 'f', precision, 64)
-			postfix, _ := getPostFix(j)
+			postfix := ""
+			if !suppress {
+				postfix, _ = getPostFix(j)
+			}
 			fmt.Fprintf(os.Stdout, "%s %s\n", formatted, postfix)
 		}
 	}

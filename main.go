@@ -46,23 +46,34 @@ func main() {
 
 	// options that result in immediate exit, such as --version or --help
 	utils.CheckImmediateExitOpts(opt)
-	prec := utils.Prec
+
+	// large precisions are both useless, and do obnoxious things to the terminal
+	prec, err := utils.CheckPrecision()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
+	}
+
+	suppress := utils.Suppress
 
 	if terminal.IsTerminal(int(os.Stdin.Fd())) {
 		//utils.PrintRemaining(remaining)
-		err := utils.DisplayResults(remaining, prec)
+		err := utils.DisplayResults(remaining, prec, suppress)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
 			utils.DisplayHelp(opt)
 			os.Exit(1)
 		}
 	} else {
-		// FIXME: when both STDIN and args are being used, there program won't exit without a <cr>
-		fmt.Println("not a tty")
 		//read from STDIN (presumably a pipe)
-		utils.PrintRemaining(utils.ReadFromSTDIN())
+		fromStdin := utils.ReadFromSTDIN()
 		// positional arguments if any
-		utils.PrintRemaining(remaining)
+		remaining = append(fromStdin, remaining...)
+		err := utils.DisplayResults(remaining, prec, suppress)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
+			utils.DisplayHelp(opt)
+			os.Exit(1)
+		}
 	}
 
 }

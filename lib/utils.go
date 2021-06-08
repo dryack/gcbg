@@ -246,6 +246,8 @@ func DisplayResults(remaining []string, precision int, suppress bool) error {
 	if err != nil {
 		return err
 	}
+
+	enumeration := 0
 	for i := range remaining {
 		num, err := strconv.ParseFloat(strings.TrimSuffix(strings.TrimSuffix(remaining[i], "\n"), "\r"), len(remaining[i]))
 		if err != nil {
@@ -275,8 +277,12 @@ func DisplayResults(remaining []string, precision int, suppress bool) error {
 			if !suppress {
 				postfix, _ = getPostFix(j)
 			}
+			if enum {
+				fmt.Fprintf(os.Stdout, "[%v]: ", enumeration)
+			}
 			fmt.Fprintf(os.Stdout, "%s %s\n", formatted, postfix)
 		}
+		enumeration++
 	}
 	return nil
 }

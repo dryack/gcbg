@@ -65,7 +65,10 @@ func ProcessArgs() *getoptions.GetOpt {
 }
 
 func DisplayHelp(opt *getoptions.GetOpt) {
-	fmt.Fprintf(os.Stderr, opt.Help())
+	_, err := fmt.Fprintln(os.Stderr, opt.Help())
+	if err != nil {
+		return
+	}
 }
 
 func CheckImmediateExitOpts(opt *getoptions.GetOpt) {
@@ -118,9 +121,9 @@ func PrintRemaining(remaining []string) {
 }
 
 func GetSIOption() (v.SIMode, error) {
-	if tib == true && gib == true && mib == true && kib == true {
+	if tib && gib && mib && kib {
 		return v.TGMK, nil
-	} else if tib == true && gib == true && mib == true {
+	} else if tib && gib && mib {
 		return v.TGM, nil
 	} else if tib && mib && kib {
 		return v.TMK, nil
@@ -150,7 +153,7 @@ func GetSIOption() (v.SIMode, error) {
 		return v.K, nil
 	} else {
 		return v.G, nil
-		//return -1, errors.New("unsupported SI Mode")
+		// return -1, errors.New("unsupported SI Mode")
 	}
 }
 

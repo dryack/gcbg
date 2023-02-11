@@ -25,7 +25,7 @@ package main
 import (
 	"fmt"
 	utils "gcgb/lib"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 	"os"
 )
 
@@ -33,7 +33,10 @@ func main() {
 	opt := utils.ProcessArgs()
 	// early bail if there are no args
 	if len(os.Args) < 2 {
-		fmt.Println("ERROR: no arguments provided\n")
+		_, err := fmt.Fprintln(os.Stderr, "ERROR: no arguments provided")
+		if err != nil {
+			return
+		}
 		utils.DisplayHelp(opt)
 		os.Exit(1)
 	}
@@ -55,8 +58,8 @@ func main() {
 
 	suppress := utils.Suppress
 
-	if terminal.IsTerminal(int(os.Stdin.Fd())) {
-		//utils.PrintRemaining(remaining)
+	if term.IsTerminal(int(os.Stdin.Fd())) {
+		// utils.PrintRemaining(remaining)
 		err := utils.DisplayResults(remaining, prec, suppress)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %s\n\n", err)
@@ -64,7 +67,7 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		//read from STDIN (presumably a pipe)
+		// read from STDIN (presumably a pipe)
 		fromStdin := utils.ReadFromSTDIN()
 		// positional arguments if any
 		remaining = append(fromStdin, remaining...)
